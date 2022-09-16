@@ -30,4 +30,9 @@ class JavaStudyTestApplicationTests {
         System.out.println(Season.WINTER);
         System.out.println(Season.WINTER.getSeasonDesc());
     }
+
+    @Test
+    public void test3(){
+        System.out.println("hello");
+    }
 }
