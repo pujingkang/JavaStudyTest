@@ -1,7 +1,7 @@
 package com.souls.test;
 
 import lombok.extern.slf4j.Slf4j;
-import sun.tools.jconsole.JConsole;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j(topic = "c.test12")
 public class test12 {
@@ -39,24 +39,45 @@ class Philosopher extends Thread {
         }
     }
 
+//    @Override
+//    public void run() {
+//        while (true) {
+//            // 获得左手筷子
+//            synchronized (left) {
+//                // 获得右手筷子
+//                synchronized (right) {
+//                    // 吃饭
+//                    eat();
+//                }
+//            }
+//        }
+//    }
+
+    //使用可重入锁解决哲学家就餐问题
     @Override
     public void run() {
         while (true) {
             // 获得左手筷子
-            synchronized (left) {
-                // 获得右手筷子
-                synchronized (right) {
-                    // 吃饭
-                    eat();
+            if(left.tryLock()){
+                try {
+                    // 获得右手筷子
+                    if (right.tryLock()){
+                        try {
+                            eat();
+                        } finally {
+                            right.unlock();
+                        }
+                    }
+                }finally {
+                    //关键：获取锁失败，则放弃左手筷子
+                    left.unlock();
                 }
-                // 放下右手筷子
             }
-            // 放下左手筷子
         }
     }
 }
 
-class Chopstick {
+class Chopstick extends ReentrantLock {
     String name;
     public Chopstick(String name) {
         this.name = name;
